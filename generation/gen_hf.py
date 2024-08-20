@@ -88,7 +88,11 @@ def query_model(prompt, args, port):
         "prompt": prompt,
     }
     response = requests.post(url=script_args.url + ":" + str(port) + "/generate", json=json)
-    response_json = response.json()
+    try:
+        response_json = response.json()
+    except:
+        print(response.text)
+        raise Exception("Response is not a json")
     return [response_json["text"][i][len(prompt) :] for i in range(len(response_json["text"]))]
 
 
