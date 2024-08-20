@@ -2,7 +2,7 @@
 
 # 检查是否提供了参数（模型路径）
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 <model_path>"
+    echo "Usage: $0 <model_path> <gpu_num>"
     exit 1
 fi
 
@@ -10,7 +10,7 @@ fi
 MODEL_PATH=$1
 
 # 使用for循环启动8个服务实例，每个实例使用不同的GPU和端口
-for i in {0..7}
+for i in {0..$2}
 do
     CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.api_server \
         --model $MODEL_PATH \
