@@ -67,7 +67,7 @@ class ScriptArguments:
 
     max_prompt_length: Optional[int] = field(default=1000, metadata={"help": "the maximum prompt length"})
     max_length: Optional[int] = field(default=2048, metadata={"help": "the maximum sequence length"})
-    max_steps: Optional[int] = field(default=20, metadata={"help": "max number of training steps"})
+    # max_steps: Optional[int] = field(default=20, metadata={"help": "max number of training steps"})
     num_train_epochs: Optional[int] = field(default=2, metadata={"help": "max number of training epochs"})
     logging_steps: Optional[int] = field(default=2, metadata={"help": "the logging frequency"})
     save_strategy: Optional[str] = field(default="epoch", metadata={"help": "the saving strategy"})
@@ -75,7 +75,7 @@ class ScriptArguments:
     eval_steps: Optional[int] = field(default=100, metadata={"help": "the evaluation frequency"})
     run_name: Optional[str] = field(default="dpo_soft", metadata={"help": "the run name"})
     loss_type: Optional[str] = field(default="sigmoid", metadata={"help": "the loss type"})
-    output_dir: Optional[str] = field(default="./dpo_soft", metadata={"help": "the output directory"})
+    output_dir: Optional[str] = field(default=None, metadata={"help": "the output directory"})
     log_freq: Optional[int] = field(default=1, metadata={"help": "the logging frequency"})
 
     # instrumentation
@@ -105,6 +105,9 @@ class ScriptArguments:
     mask_prompt: Optional[bool] = field(default=False, metadata={"help": "mask prompt"})
     len_penalty: Optional[float] = field(default=0, metadata={"help": "the length penalty"})
 
+    hub_model_id: Optional[str] = field(default=None, metadata={"help": "the hub model id"})
+    hub_token: Optional[str] = field(default=None, metadata={"help": "the hub token"})
+    save_total_limit: Optional[int] = field(default=1, metadata={"help": "the save total limit"})
 
 def prepare_data(
     data_dir: str = "/home/xiongwei/data/helpful/rm/rm1003.json",
@@ -270,13 +273,17 @@ if __name__ == "__main__":
         evaluation_strategy="steps",
         eval_steps=script_args.eval_steps,
         output_dir=script_args.output_dir,
-        # report_to=script_args.report_to,
+        report_to=script_args.report_to,
         lr_scheduler_type=script_args.lr_scheduler_type,
         warmup_steps=script_args.warmup_steps,
-        # optim=script_args.optimizer_type,
+        optim=script_args.optimizer_type,
         bf16=True,
         remove_unused_columns=False,
         run_name=script_args.run_name,
+        push_to_hub=script_args.push_to_hub,
+        hub_model_id=script_args.hub_model_id,
+        hub_token=script_args.hub_token,
+        save_total_limit=script_args.save_total_limit,
     )
     print(training_args)
 
@@ -302,6 +309,5 @@ if __name__ == "__main__":
     dpo_trainer.train()
     dpo_trainer.save_model(script_args.output_dir)
 
-    # 7. save
-    output_dir = os.path.join(script_args.output_dir, "final_checkpoint")
-    dpo_trainer.model.save_pretrained(output_dir)
+    if script_args.push_to_hub:
+        dpo_trainer.push_to_hub()
