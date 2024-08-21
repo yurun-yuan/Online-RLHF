@@ -12,6 +12,7 @@ from transformers import (
     HfArgumentParser,
     TrainingArguments,
 )
+from trl import DPOConfig
 
 
 @dataclass
@@ -255,7 +256,7 @@ if __name__ == "__main__":
 
     # 4. initialize training arguments:
 
-    training_args = TrainingArguments(
+    training_args = DPOConfig(
         per_device_train_batch_size=script_args.per_device_train_batch_size,
         per_device_eval_batch_size=script_args.per_device_eval_batch_size,
         # max_steps=script_args.max_steps,
