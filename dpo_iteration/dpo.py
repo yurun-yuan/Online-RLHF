@@ -376,6 +376,7 @@ class PreferenceTrainer(DPOTrainer):
             policy_rejected_logps,
             policy_chosen_logits,
             policy_rejected_logits,
+            _,
         ) = self.concatenated_forward(model, batch)
         with torch.no_grad():
             if self.ref_model is None:
@@ -385,11 +386,13 @@ class PreferenceTrainer(DPOTrainer):
                         reference_rejected_logps,
                         _,
                         _,
+                        _,
                     ) = self.concatenated_forward(self.model, batch)
             else:
                 (
                     reference_chosen_logps,
                     reference_rejected_logps,
+                    _,
                     _,
                     _,
                 ) = self.concatenated_forward(self.ref_model, batch)
