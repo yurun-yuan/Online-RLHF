@@ -50,20 +50,19 @@ class ScriptArguments:
     )
 
 class ArmoRMPipeline:
-    def __init__(self, model_id, device_map="auto", torch_dtype=torch.bfloat16, truncation=True, trust_remote_code=False, max_length=4096):
+    def __init__(self, model_id, device, torch_dtype=torch.bfloat16, truncation=True, trust_remote_code=False, max_length=4096):
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model_id,
-            device_map=device_map,
             trust_remote_code=trust_remote_code,
             torch_dtype=torch_dtype,
             use_flash_attention_2=False,
-        )
+        ).to(device)
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_id,
             use_fast=True,
         )
         self.truncation = truncation
-        self.device = self.model.device
+        self.device = device
         self.max_length = max_length
 
     def __call__(self, messages: List[Dict[str, str]]) -> Dict[str, float]:
@@ -86,20 +85,22 @@ class ArmoRMPipeline:
 
 
 accelerator = Accelerator()
+local_rank = Accelerator().local_process_index
 
 parser = HfArgumentParser(ScriptArguments)
 script_args = parser.parse_args_into_dataclasses()[0]
 
 device = accelerator.device
+print(f"local_rank: {local_rank}\tdevice: {device}")
+
 reward_model = script_args.reward_name_or_path
-rm_pipe = ArmoRMPipeline(reward_model, trust_remote_code=True)
+rm_pipe = ArmoRMPipeline(reward_model, device, trust_remote_code=True)
 
 
 ds_dir = script_args.dataset_name_or_path
 world_size = int(os.getenv("WORLD_SIZE", "1"))
 ds = load_dataset("json", data_files=ds_dir, split="train", field="instances")
 
-local_rank = Accelerator().local_process_index
 
 data_size = len(ds["prompt"])
 
