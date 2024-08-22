@@ -149,51 +149,10 @@ with torch.no_grad():
         rewards = get_reward(test_texts)
         data.append({"prompt": sample["prompt"], "responses": sample["responses"], "rewards": rewards})
 
-
-# Send the data to other GPUs
-world_size = int(os.getenv("WORLD_SIZE", "1"))
-print("world_size: ", world_size)
-all_process_list = [{}] * world_size
-
-data_to_send = {
-    "data": [[data[i]] for i in range(len(data))],
+partial_data = {
+    "type": "text_only",
+    "instances": data,
 }
 
-import torch.distributed as dist
-
-# dist.init_process_group(backend="nccl", rank=local_rank, world_size=world_size)
-
-dist.all_gather_object(all_process_list, data_to_send)
-gathered_data = []
-
-
-for i in range(world_size):
-    tmp_data = [tmp[0] for tmp in all_process_list[i]["data"]]
-    gathered_data.extend(tmp_data)
-
-all_rewards = [sample["rewards"] for sample in gathered_data]
-top1_scores = np.mean(np.max(all_rewards, axis=1))
-mean_scores = np.mean(all_rewards)
-
-
-if local_rank == 0:
-    print(
-        "Collect {} data from {} inputs. mean score {} top1 score: {}".format(
-            len(gathered_data), data_size, mean_scores, top1_scores
-        )
-    )
-    if len(gathered_data) < data_size:
-        print(
-            "Some of the prompts are with responses < {}. This can happen because the prompt is too long and is ignored by VLLM".format(
-                script_args.K
-            )
-        )
-    output_eval_dataset = {}
-    output_eval_dataset["type"] = "text_only"
-    output_eval_dataset["instances"] = gathered_data
-    with open(script_args.output_dir, "w", encoding="utf8") as f:
-        json.dump(output_eval_dataset, f, ensure_ascii=False)
-
-    if script_args.record_dir is not None:
-        with open(script_args.record_dir, "a") as f:
-            f.write(str(mean_scores) + "\t" + str(top1_scores) + "\n")
+with open(script_args.output_dir + str(local_rank) + ".json", "w", encoding="utf8") as f:
+        json.dump(partial_data, f, ensure_ascii=False)

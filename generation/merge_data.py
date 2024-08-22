@@ -28,6 +28,10 @@ class ScriptArguments:
         default="",
         metadata={"help": "the location of the output file"},
     )
+    shuffle: Optional[bool] = field(
+        default=True,
+        metadata={"help": "shuffle the data or not"},
+    )
 
 
 parser = HfArgumentParser(ScriptArguments)
@@ -43,7 +47,8 @@ for my_dir in all_dirs:
     for sample in ds:
         gathered_data.append(sample)
 
-random.shuffle(gathered_data)
+if script_args.shuffle:
+    random.shuffle(gathered_data)
 
 print("I collect ", len(gathered_data), "samples")
 
