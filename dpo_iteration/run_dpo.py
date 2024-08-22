@@ -105,6 +105,7 @@ class ScriptArguments:
     mask_prompt: Optional[bool] = field(default=False, metadata={"help": "mask prompt"})
     len_penalty: Optional[float] = field(default=0, metadata={"help": "the length penalty"})
 
+    push_to_hub: Optional[bool] = field(default=False, metadata={"help": "push to hub"})
     hub_model_id: Optional[str] = field(default=None, metadata={"help": "the hub model id"})
     hub_token: Optional[str] = field(default=None, metadata={"help": "the hub token"})
     save_total_limit: Optional[int] = field(default=1, metadata={"help": "the save total limit"})
