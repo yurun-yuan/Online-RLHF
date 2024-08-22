@@ -160,7 +160,7 @@ data_to_send = {
 
 import torch.distributed as dist
 
-dist.init_process_group(backend="nccl", rank=local_rank, world_size=world_size)
+# dist.init_process_group(backend="nccl", rank=local_rank, world_size=world_size)
 
 dist.all_gather_object(all_process_list, data_to_send)
 gathered_data = []
