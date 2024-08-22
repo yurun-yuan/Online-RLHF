@@ -56,6 +56,7 @@ class ArmoRMPipeline:
             device_map=device_map,
             trust_remote_code=trust_remote_code,
             torch_dtype=torch_dtype,
+            use_flash_attention_2=False,
         )
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_id,
