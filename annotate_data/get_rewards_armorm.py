@@ -137,9 +137,11 @@ def change_of_format(prom, resp):
 
 data = []
 
+import itertools
+
 # tqdm is used to show the progress bar
 with torch.no_grad():
-    for sample in tqdm(ds):
+    for sample in tqdm(itertools.islice(ds, 2)):
         # The VLLM may not generate responses for some prompts because it is too long, we skip them
         if len(sample["responses"]) < script_args.K:
             continue
@@ -158,7 +160,7 @@ data_to_send = {
 
 import torch.distributed as dist
 
-dist.init_process_group(backend="nccl")
+dist.init_process_group(backend="nccl", rank=local_rank, world_size=world_size)
 
 dist.all_gather_object(all_process_list, data_to_send)
 gathered_data = []
