@@ -108,6 +108,7 @@ class ScriptArguments:
     push_to_hub: Optional[bool] = field(default=False, metadata={"help": "push to hub"})
     hub_model_id: Optional[str] = field(default=None, metadata={"help": "the hub model id"})
     hub_token: Optional[str] = field(default=None, metadata={"help": "the hub token"})
+    hub_strategy: Optional[str] = field(default="every_save", metadata={"help": "the hub strategy"})
     save_total_limit: Optional[int] = field(default=1, metadata={"help": "the save total limit"})
 
 def prepare_data(
@@ -284,6 +285,7 @@ if __name__ == "__main__":
         push_to_hub=script_args.push_to_hub,
         hub_model_id=script_args.hub_model_id,
         hub_token=script_args.hub_token,
+        hub_strategy=script_args.hub_strategy,
         save_total_limit=script_args.save_total_limit,
     )
     print(training_args)
