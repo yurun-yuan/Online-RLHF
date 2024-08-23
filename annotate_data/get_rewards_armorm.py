@@ -141,7 +141,7 @@ import itertools
 
 # tqdm is used to show the progress bar
 with torch.no_grad():
-    for sample in tqdm(itertools.islice(ds, 2)):
+    for sample in tqdm(ds):
         # The VLLM may not generate responses for some prompts because it is too long, we skip them
         if len(sample["responses"]) < script_args.K:
             continue
