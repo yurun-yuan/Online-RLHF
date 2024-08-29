@@ -112,7 +112,7 @@ ds = ds.map(
 
 data_size = len(ds["prompt"])
 one_num_share = int(data_size / script_args.my_world_size)
-ds = ds.select(np.arange(script_args.local_index * one_num_share, (script_args.local_index + 1) * one_num_share))
+ds = ds.select(np.arange(0, 2048))
 
 print([script_args.local_index * one_num_share, (script_args.local_index + 1) * one_num_share])
 print(ds, script_args.dataset_name_or_path)
