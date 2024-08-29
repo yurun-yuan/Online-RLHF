@@ -79,6 +79,9 @@ seed = script_args.seed
 torch.manual_seed(seed)
 np.random.seed(seed)
 
+num_gpus = torch.cuda.device_count()
+print(f"num_gpus: {num_gpus}")
+
 llm = LLM(
     model=model_path,
     tokenizer=model_path,
@@ -86,6 +89,7 @@ llm = LLM(
     max_model_len=script_args.max_input_length,
     load_format="auto",
     seed=42,
+    tensor_parallel_size=num_gpus,
 )
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 
